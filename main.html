@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stall</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/conn.js"></script>
+    <script src="js/main.js"></script>
+    <script>window.name = "index";</script>
+    <style>
+        #theFlyers{
+            width: 100%;
+            padding: 10px;
+            box-shadow: 0px 0px 3px rgba(0,0,0,0.8);
+        }
+        #theOrder{
+            padding:5px;
+            margin: 5px;
+            border: solid 1px #999;
+            background:#fff;
+        }
+        #orderList{
+            padding:5px;
+            margin: 5px;
+            
+            background:#fff;
+        }
+        #totalOrder{
+            padding:5px;
+            margin: 5px;
+            background:#fff;
+        }
+    </style>
+</head>
+<body id="theBody">
+    <header>
+        <nav>
+            <div id="logoContainer">
+                <img id="theLogo" src="img/dapoBija.png">
+            </div>
+            <div class="navBtn" onclick="gotoPage('index.html')">
+                <img class="navLogo" src="img/homeBtn.png">
+                <div class="subBtn">Home</div>
+            </div>
+            <div class="navBtn" onclick="gotoPage('carts.html')">
+                <img class="navLogo" src="img/cartBtn.png">
+                <span id="cartNum" class="smlNum">0</span>
+                <div class="subBtn">My Cart</div>
+            </div>
+            <div class="navBtn" onclick="gotoPage('history.html')">
+                <img class="navLogo" src="img/historyBtn.png">
+                <div class="subBtn">History</div>
+            </div>
+            <div class="navBtn" onclick="gotoPage('profile.html')">
+                    <img class="navLogo" src="img/profileBtn.png">
+                    <div class="subBtn">Profile</div>
+                </div>
+            
+        </nav>
+    </header>
+    <div id="mainContainer">
+        <div id="ads"></div>
+    <img id="theFlyers">
+    <div id="order">
+        <div id="theOrder" class="theOrder">
+            <div id="orderList">
+                <h2>Your Order List</h2>
+            </div>
+            <div id="totalOrder">
+                <h2>Total Order</h2>
+                <div id="delivery"></div>
+            </div>
+            <div class="btn" id="confirmOrder" onclick="addCart()">Buy Now</div>
+            <div class="btn cancel" id="cancels" onclick="gotoPage('index.html')">Cancel</div>
+        </div>
+        <div id="input"></div>
+        
+    </div>
+    <script>
+        function getFlyers(){
+            var ttg = "mainContent=stall";
+            ttg += "&";
+            ttg += "stallNum="+localStorage.getItem("stall");
+            xPost(
+                processorLink,
+                ttg,
+                function(trig){
+                    _("theFlyers").src = imgLink + "flyers/" + trig;
+                }
+            )
+        
+        }
+        getFlyers();
+        function getProduct(){
+            _cr("order","style","inputStyle");
+            _("inputStyle").innerHTML = "#input{padding:10px;display:flex;flex-direction:column;justify-content:space-between;}";
+            _("inputStyle").innerHTML += "#input {padding:10px;margin:5px 10px;border-radius:5px;font-size:1rem;}";
+            _("inputStyle").innerHTML += ".item-div{background:#efefef;display:flex;flex-direction:column;padding:5px;margin:5px 10px;border:solid 1px #000;box-shadow:0px 0px 10px 1px rgba(0,0,0,0.6);}";
+            _("inputStyle").innerHTML += ".itemName{font-size:1.5rem}";
+            _("inputStyle").innerHTML += ".itemPrice{font-size:1.2rem}";
+            _("inputStyle").innerHTML += ".order{box-shadow:0px 0px 10px 1px rgba(0,0,0,0.6);display:flex;flex-direction:column;margin:5px 0px;padding:5px;border:solid 1px #666;border-radius:5px;}";
+            //_("inputStyle").innerHTML += ".orderContainer{display:flex;justify-content:space-between;padding:5px;font-size:1.2rem}";
+            _("inputStyle").innerHTML += ".cancelOrder{display:flex;justify-content:flex-end;margin-bottom:5px;}";
+            _("inputStyle").innerHTML += ".orderListCont{margin:5px 0px;padding:5px;font-size:1.6rem}";
+            _("inputStyle").innerHTML += ".optionsContMain{width:100%}";
+            _("inputStyle").innerHTML += ".optionsCont,.orderContainer{font-size:1rem;display:flex;justify-content:space-between;margin:5px 10px;padding:5px;border-bottom:solid 2px #999;color:#000;}";
+            _("inputStyle").innerHTML += ".options, .orderQty-div{background:#000;margin:0px 5px;padding:0px 5px;border-radius:10px;color:#fff;}";
+            _("inputStyle").innerHTML += ".selectOpt{padding:10px;margin-top:5px;background:#c0d8cc;}";
+            _("inputStyle").innerHTML += ".avail{padding:5px;margin-top:8px;font-size:1.2rem;}";
+            _("inputStyle").innerHTML += ".optSel{margin:5px;padding:5px;background:#999;cursor:pointer;}";
+            _("inputStyle").innerHTML += ".removeOrderBtn{box-shadow:0px 0px 10px 1px rgba(0,0,0,0.6);border:solid 1px #000;text-align:center;margin:5px;padding:5px;background:#bbb;cursor:pointer;border-radius:5px;}";
+            _("inputStyle").innerHTML += ".addOrderBtn{box-shadow:0px 0px 10px 1px rgba(0,0,0,0.6);border:solid 1px #000;text-align:center;margin:5px;padding:5px;background:#bbb;cursor:pointer;border-radius:5px;}";
+            _("inputStyle").innerHTML += ".addMinusBtn{display:flex;justify-content:flex-start;}";
+            _("inputStyle").innerHTML += ".optSubTotal,.orderContainerTotal{display:flex;justify-content:flex-end;font-size:1.6rem;border-bottom:2px solid #666;}";
+            _("inputStyle").innerHTML += ".productImg{width:100%;}";
+            
+                    
+            xPost(
+            processorLink,
+            "mainContent=product&flyersID="+localStorage.getItem("stall"),
+                function(trig){
+                var jsonData = JSON.parse(trig);
+                
+                    var JsonDataLength = parseInt(jsonData[1]["id"]) + parseInt(Object.keys(jsonData).length);
+                    for(var ts=1;ts<=Object.keys(jsonData).length;ts++){
+                        _cr("input","div","item-div"+ts);
+                        _("item-div"+ts).setAttribute("class","item-div");
+                        
+                        _cr("item-div"+ts,"div","itemDetail"+ts);
+
+                        _cr("itemDetail"+ts,"img","productImg"+ts);
+                        _("productImg"+ts).setAttribute("src",imgLink + "product/1/" +jsonData[ts]["img"]);
+                        _("productImg"+ts).setAttribute("class","productImg")
+
+                        _cr("itemDetail"+ts,"div","itemName"+ts);
+                        _("itemName"+ts).setAttribute("class","itemName");
+                        _("itemName"+ts).innerText = jsonData[ts]["name"];
+
+                        var var_itemPrice = jsonData[ts]["price"];
+                        if(var_itemPrice == ""){
+                            var_itemPrice = 0;
+                        }
+                        _cr("itemDetail"+ts,"div","itemPrice"+ts);
+                        _("itemPrice"+ts).setAttribute("class","itemPrice");
+                        _("itemPrice"+ts).innerHTML = numRM(var_itemPrice);
+                        
+                        _cr("itemDetail"+ts,"div","itemDesc"+ts);
+                        _("itemDesc"+ts).setAttribute("class","itemDesc");
+                        _("itemDesc"+ts).innerText = jsonData[ts]["description"];
+
+                        var selOpt = "false";
+                        if(jsonData[ts]["option"] != ""){
+                            
+                            _cr("item-div"+ts,"div","label"+ts);
+                            _("label"+ts).setAttribute("class","avail");
+
+                            _("label"+ts).innerText = "Available Option : ";
+                            _cr("item-div"+ts,"div","selectOpt"+ts);
+                            _("selectOpt"+ts).setAttribute("class","selectOpt");
+
+                            for(var yt=1;yt<=Object.keys(jsonData[ts]["option"]).length;yt++){
+                                var optPrice = jsonData[ts]["option"][yt]["optPrice"]
+                                if(optPrice == ""){
+                                    optPrice = 0;
+                                }
+                                _cr("selectOpt"+ts,"div", "opts-"+ts+"-"+yt);
+                                _("opts-"+ts+"-"+yt).setAttribute("class","opts");
+                                _("opts-"+ts+"-"+yt).innerText = jsonData[ts]["option"][yt]["optName"];
+
+                                _cr("selectOpt"+ts,"div", "optsPrice-"+ts+"-"+yt);
+                                _("optsPrice-"+ts+"-"+yt).innerText = numRM(optPrice);
+
+                                _cr("selectOpt"+ts,"input","qtyOpts"+ts+"-"+yt);
+                                _("qtyOpts"+ts+"-"+yt).setAttribute("placeholder","Order Quantity");
+                                _("qtyOpts"+ts+"-"+yt).setAttribute("type","number");
+
+                                
+                                _cr("selectOpt"+ts,"div","addMinusBtn"+ts+"-"+yt);
+                                _("addMinusBtn"+ts+"-"+yt).setAttribute("class", "addMinusBtn");
+
+                                _cr("addMinusBtn"+ts+"-"+yt,"div","addItem"+ts+"-"+yt);
+                                _("addItem"+ts+"-"+yt).innerHTML = "Add Order";
+                                _("addItem"+ts+"-"+yt).setAttribute("class", "addOrderBtn");
+                                _("addItem"+ts+"-"+yt).setAttribute(
+                                    "onclick",
+                                    "addOrder('"+ts+"','"+_("qtyOpts"+ts+"-"+yt).value+"','"+yt+"','"+jsonData[ts]["option"][yt]["optID"]+"','"+jsonData[ts]["id"]+"')"
+                                    );
+
+                                _cr("addMinusBtn"+ts+"-"+yt,"div","minusItem"+ts+"-"+yt);
+                                _("minusItem"+ts+"-"+yt).innerHTML = "Remove Order";
+                                _("minusItem"+ts+"-"+yt).setAttribute("class", "removeOrderBtn");
+                                _("minusItem"+ts+"-"+yt).setAttribute(
+                                    "onclick",
+                                    "minusOrder('"+ts+"','"+_("qtyOpts"+ts+"-"+yt).value+"','"+yt+"','"+jsonData[ts]["option"][yt]["optID"]+"','"+jsonData[ts]["id"]+"')"
+                                    );
+                            }
+                        }else{
+
+                        _cr("item-div"+ts,"input","qty"+ts);
+                        _("qty"+ts).setAttribute("placeholder","Order Quantity");
+                        _("qty"+ts).setAttribute("type","text");
+
+                        _cr("item-div"+ts,"div","addMinusBtn"+ts);
+                        _("addMinusBtn"+ts).setAttribute("class", "addMinusBtn");
+
+                        _cr("addMinusBtn"+ts,"div","addItem"+ts);
+                        _("addItem"+ts).innerHTML = "Add Order";
+                        _("addItem"+ts).setAttribute("class", "addOrderBtn");
+                        _("addItem"+ts).setAttribute(
+                            "onclick",
+                            "addOrder('"+ts+"','"+_("qty"+ts).value+"','"+selOpt+"','none','"+jsonData[ts]["id"]+"')"
+                            );
+
+                        _cr("addMinusBtn"+ts,"div","minusItem"+ts);
+                        _("minusItem"+ts).innerHTML = "Remove Order";
+                        _("minusItem"+ts).setAttribute("class", "removeOrderBtn");
+                        _("minusItem"+ts).setAttribute(
+                            "onclick",
+                            "minusOrder('"+ts+"','"+_("qty"+ts).value+"','"+selOpt+"','none','"+jsonData[ts]["id"]+"')"
+                            );
+                        }
+                    }
+                }
+            )
+        }
+        getProduct()
+        _cr("totalOrder","div","grandTotal");
+        _("grandTotal").setAttribute("class","orderContainerTotal");
+        function addOrder(on,oqty,oOpt,optID,orderID){
+            
+            if(oqty == ""){oqty = 1;}
+            if(!_("order"+on)){
+                
+                _cr("orderList","div","order"+on);
+                _("order"+on).setAttribute("class","order");
+
+                _cr("order"+on,"div","cancelOrder"+on);
+                _("cancelOrder"+on).innerHTML = '<img width="20" height="20" src="img/xBtn.png">';
+                _("cancelOrder"+on).setAttribute("class", "cancelOrder");
+                _("cancelOrder"+on).setAttribute("onclick","cancelOrder("+on+")");
+
+                _cr("order"+on,"input","orderID"+on);
+                _("orderID"+on).setAttribute("value",orderID);
+                _("orderID"+on).setAttribute("type","hidden");
+                
+                _cr("order"+on,"div","order-div"+on);
+                _("order-div"+on).setAttribute("class","orderListCont");
+                _("order-div"+on).innerHTML = _("itemName"+on).innerText;
+
+                _cr("order"+on,"div","orderContainer"+on);
+                _("orderContainer"+on).setAttribute("class","orderContainer");
+
+                _cr("order"+on,"div","orderContainerTotal"+on);
+                _("orderContainerTotal"+on).setAttribute("class","orderContainerTotal");
+                _("orderContainerTotal"+on).innerHTML = numRM(oqty);
+
+                _cr("orderContainer"+on,"div","order-unitPrice"+on);
+                _("order-unitPrice"+on).innerHTML = _("itemPrice"+on).innerText;
+
+                _cr("orderContainer"+on,"div","order-Times"+on);
+                _("order-Times"+on).innerHTML = " X ";
+                
+                _cr("orderContainer"+on,"div","orderQty-div"+on);
+                _("orderQty-div"+on).innerText = oqty;
+                _("orderQty-div"+on).setAttribute("class", "orderQty-div");
+                
+                _cr("orderContainer"+on,"div","subOrder-total"+on);
+            }else{
+                    _("orderQty-div"+on).innerText = parseInt(_("orderQty-div"+on).innerText) + parseInt(oqty);
+            }
+            _("subOrder-total"+on).innerText = numRM(parseInt(_("order-unitPrice"+on).innerHTML.split(" ")[1]) * parseInt(_("orderQty-div"+on).innerText));
+            _("orderContainerTotal"+on).innerHTML = _("subOrder-total"+on).innerText;
+
+            if(oOpt != "false"){
+
+                _("orderContainerTotal"+on).style.display = "none";
+                if(!_("optionsContainer"+on)){
+                    
+                _cr("order"+on,"div","optionsContainer"+on);
+                _("optionsContainer"+on).setAttribute("class", "optionsContMain");
+
+                _cr("order"+on,"div","optSubTotal"+on);
+                _("optSubTotal"+on).setAttribute("class", "optSubTotal");
+                }
+                if(!_("optSel"+on +"-"+ oOpt)){
+                    _cr("optionsContainer"+on,"div","optionsContainer"+on +"-"+ oOpt);
+                    _("optionsContainer"+on +"-"+ oOpt).setAttribute("class", "optionsCont");
+
+                    _cr("optionsContainer"+on +"-"+ oOpt,"input","optID"+on +"-"+ oOpt);
+                    _("optID"+on +"-"+ oOpt).setAttribute("value",optID);
+                    _("optID"+on +"-"+ oOpt).setAttribute("type","hidden");
+
+                    _cr("optionsContainer"+on +"-"+ oOpt,"div","optSelName"+on +"-"+ oOpt);
+                    _("optSelName"+on +"-"+ oOpt).innerText = _("opts-"+on +"-"+ oOpt).innerText;
+                    
+
+                    _cr("optionsContainer"+on +"-"+ oOpt,"div","optSelPrice"+on +"-"+ oOpt);
+                    _("optSelPrice"+on +"-"+ oOpt).innerText = _("optsPrice-"+on+"-"+oOpt).innerText;
+
+                    _cr("optionsContainer"+on +"-"+ oOpt,"div","optSelTimes"+on +"-"+ oOpt);
+                    _("optSelTimes"+on +"-"+ oOpt).innerText = "X";
+
+                    _cr("optionsContainer"+on +"-"+ oOpt,"div","optSel"+on +"-"+ oOpt);
+                    _("optSel"+on +"-"+ oOpt).innerText = oqty;
+                    _("optSel"+on +"-"+ oOpt).setAttribute("class", "options");
+
+                    _cr("optionsContainer"+on +"-"+ oOpt,"div","optSelTotal"+on +"-"+ oOpt);
+                }else{
+                    _("optSel"+on +"-"+ oOpt).innerText = parseInt(_("optSel"+on +"-"+ oOpt).innerText) + parseInt(oqty);
+                }
+                _("optSelTotal"+on +"-"+ oOpt).innerText = numRM(_("optSelPrice"+on +"-"+ oOpt).innerText.split(" ")[1] * _("optSel"+on +"-"+ oOpt).innerText);
+                var overAllOptTotal = 0;
+                for(var qe=0;qe<_("optionsContainer"+on).childElementCount;qe++){
+                    overAllOptTotal += parseFloat(_("optionsContainer"+on).children[qe].children[5].innerText.split(" ")[1]);
+                }
+                _("optSubTotal"+on).innerText = numRM(parseFloat(overAllOptTotal) + parseFloat(_("subOrder-total"+on).innerText.split(" ")[1]));
+            }  
+            countGT(); 
+            recordCart();
+            deliveryFee();
+        }
+        function minusOrder(mn,mqty,mOpt,optID,orderID){
+            if(mqty == ""){mqty = 1;}
+            if(_("order"+mn)){
+                if(mOpt != "false"){
+                    if(_("optSel"+mn +"-"+ mOpt)){
+                        _("optSel"+mn +"-"+ mOpt).innerText = parseInt(_("optSel"+mn +"-"+ mOpt).innerText) - parseInt(mqty);
+                        _("orderQty-div"+mn).innerText = parseInt(_("orderQty-div"+mn).innerText) - parseInt(mqty);
+                        
+                        _("optSelTotal"+mn +"-"+ mOpt).innerText = numRM(_("optSelPrice"+mn +"-"+ mOpt).innerText.split(" ")[1] * _("optSel"+mn +"-"+ mOpt).innerText);
+                        _("subOrder-total"+mn).innerText = numRM(parseInt(_("order-unitPrice"+mn).innerHTML.split(" ")[1]) * parseInt(_("orderQty-div"+mn).innerText));
+
+                        var overAllOptTotal = 0;
+                        for(var qe=0;qe<_("optionsContainer"+mn).childElementCount;qe++){
+                            overAllOptTotal += parseFloat(_("optionsContainer"+mn).children[qe].children[5].innerText.split(" ")[1]);
+                        }
+                        _("optSubTotal"+mn).innerText = numRM(parseFloat(overAllOptTotal) + parseFloat(_("subOrder-total"+mn).innerText.split(" ")[1]));
+
+                        if(parseFloat(_("optSel"+mn +"-"+ mOpt).innerText) == 0){
+                            _("optionsContainer"+mn +"-"+ mOpt).parentNode.removeChild(_("optionsContainer"+mn +"-"+ mOpt));
+                        } 
+                    }
+                    if(parseFloat(_("orderQty-div"+mn).innerText) == 0){
+                        _("order"+mn).parentNode.removeChild(_("order"+mn));
+                    }
+                }else{
+                    _("orderQty-div"+mn).innerText = parseInt(_("orderQty-div"+mn).innerText) - parseInt(mqty);
+                    _("subOrder-total"+mn).innerText = numRM(parseInt(_("order-unitPrice"+mn).innerHTML.split(" ")[1]) * parseInt(_("orderQty-div"+mn).innerText));
+                    _("orderContainerTotal"+mn).innerHTML = _("subOrder-total"+mn).innerText;
+                    if(parseFloat(_("orderContainerTotal"+mn).innerText.split(" ")[1]) == 0){
+                        _("order"+mn).parentNode.removeChild(_("order"+mn));
+                    }
+                }
+            }
+            countGT();
+            recordCart();
+            deliveryFee();
+        }
+        function countGT(){
+            var totGT = 0;
+            var countOrder = _("orderList").children.length;
+            for(var fr=1; fr<countOrder;fr++){
+                var theOrder;
+                if(_("orderList").children[fr].children[6] == null){
+                    theOrder = parseFloat(_("orderList").children[fr].children[4].innerText.split(" ")[1]);
+                }else{
+                    theOrder = parseFloat(_("orderList").children[fr].children[6].innerText.split(" ")[1]);
+                };
+                totGT += theOrder;
+            }
+            _("grandTotal").innerText = numRM(totGT);
+        }
+        function cancelOrder(cw){
+            var cr = _("order"+cw);
+            cr.parentNode.removeChild(cr);
+            countGT();
+            recordCart();
+            deliveryFee();
+        }
+        countGT();
+        var j;
+        function recordCart(){
+            j = JSON.parse(localStorage.getItem("carts"));
+            if(_("orderList").childElementCount == 1){dataStore ="{}"}else{
+                    var totalOrder = _("orderList").childElementCount - 1;
+                    var dataStore;
+                    var pp = Object.keys(JSON.parse(localStorage.getItem("carts")).orders).length;
+                    pp += 1;
+                    for(var ls=1;ls<=totalOrder;ls++,pp++){
+                        dataStore = '{';
+                        dataStore += '"adsID":"'+localStorage.getItem("stall")+'",';
+                        dataStore += '"productID":"'+orderList.children[ls].children[1].value+'",';
+                        dataStore += '"qty":"'+orderList.children[ls].children[3].children[2].innerText+'",';
+                        dataStore += '"opt":';
+                            
+                            if(orderList.children[ls].children[5] == null){
+                                dataStore += '{}';
+                            }else{
+                                dataStore += '{';
+                                var childCount = orderList.children[ls].children[5].childElementCount;
+                                for(var lsO = 1;lsO<=childCount;lsO++){
+                                    dataStore += '"'+lsO+'":';
+                                    dataStore += '{';
+                                        dataStore += '"optID":"'+orderList.children[ls].children[5].children[lsO-1].children[0].value+'",';
+                                        dataStore += '"optQty":"'+orderList.children[ls].children[5].children[lsO-1].children[4].innerText+'"';
+                                    dataStore += '}';
+                                    if(lsO<childCount){                    
+                                    dataStore += ',';
+                                    }
+                                }
+                                dataStore += '}';
+                            }
+                            dataStore += '}';
+                    
+                        j.orders[pp] = JSON.parse(dataStore);
+                    }
+        }
+        }
+        function addCart(){
+            if(_("orderList").childElementCount == 1){
+                alert("Your order list is empty.  Please select your order. Thank you.");
+            }else{
+                    
+                    localStorage.setItem("carts",JSON.stringify(j));
+                    _("cartNum").innerText = Object.keys(j.orders).length;
+                    window.location.href = "carts.html";
+                }
+        }
+    function updateCart(){
+    if(localStorage.getItem("carts")){
+        var a = JSON.parse(localStorage.getItem("carts"));
+        _("cartNum").innerText = Object.keys(a["orders"]).length;
+        }
+    }
+    updateCart();
+    function deliveryFee(){
+        var delOrder = 0;
+        var fhh = _("orderList").childElementCount;
+        for(var ty=1;ty<_("orderList").childElementCount;ty++){
+            delOrder += parseFloat(_("orderList").children[ty].children[3].children[2].innerText);
+        }
+        var dG = parseFloat(_("grandTotal").innerText.split(" ")[1]);
+        if(delOrder < 3){
+            _cr("delivery","div","deliveryFee");
+            _("deliveryFee").innerHTML = "Delivery Fee = RM3.00";
+            _("grandTotal").innerText = numRM(dG + 3);
+            
+        }
+        if(delOrder >= 3){
+            _("deliveryFee").innerHTML = "";
+            
+           
+        } 
+        if(fhh == 1){
+            _("deliveryFee").innerHTML = "";
+            _("grandTotal").innerText = numRM(0);
+           
+        } 
+    }
+    </script>
+    <footer>
+        
+    </footer>
+</body>
+</html>

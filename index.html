@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>index</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/conn.js"></script>
+    <script src="js/main.js"></script>
+    <style>
+        .theFlyers{
+            width: 100%;
+            box-shadow: 0px 0px 3px rgba(0,0,0,0.8);
+            color: #b0bd88;
+        }
+    </style>
+</head>
+<body id="theBody">
+    <header>
+        <nav>
+            <div id="logoContainer">
+                <img id="theLogo" src="img/dapoBija.png">
+            </div>
+            <div class="navBtn" onclick="gotoPage('index.html')">
+                <img class="navLogo" src="img/homeBtn.png">
+                <div class="subBtn">Home</div>
+            </div>
+            <div class="navBtn" onclick="gotoPage('carts.html')">
+                <img class="navLogo" src="img/cartBtn.png">
+                <span id="cartNum" class="smlNum">0</span>
+                <div class="subBtn">My Cart</div>
+            </div>
+            <div class="navBtn" onclick="gotoPage('history.html')">
+                <img class="navLogo" src="img/historyBtn.png">
+                <div class="subBtn">History</div>
+            </div>
+            <div class="navBtn" onclick="gotoPage('profile.html')">
+                    <img class="navLogo" src="img/profileBtn.png">
+                    <div class="subBtn">Profile</div>
+                </div>
+        </nav>
+    </header>
+    <div id="mainContainer">
+        <div id="ads"></div>
+    </div>
+    <script>
+        localStorage.removeItem("stall");
+        function getFlyers(){
+            xPost(
+            processorLink,
+            "mainContent=flyers&id=1",
+            function(trig){
+                var stalls = JSON.parse(trig);
+                for(var rr = 1;rr<=Object.keys(stalls).length;rr++){
+                _cr("ads","div","addsContainer"+rr);
+                _cr("addsContainer"+rr,"h1","Ftitle"+rr);
+                _("Ftitle"+rr).innerText = stalls[rr].name;
+                _cr("addsContainer"+rr,"img","theFlyers"+rr);
+                _("theFlyers"+rr).setAttribute("class", "theFlyers");
+                _("theFlyers"+rr).src = imgLink + "flyers/" + stalls[rr].links;
+                _cr("addsContainer"+rr,"input","gotoFlyers"+rr);
+                _("gotoFlyers"+rr).setAttribute("value", "Go to This Stall");
+                _("gotoFlyers"+rr).setAttribute("class", "btn");
+                _("gotoFlyers"+rr).setAttribute("onclick", "gotoStall('main.html','"+stalls[rr].id+"')");
+                }
+            }
+        )
+        }
+        getFlyers();
+        function updateCart(){
+    if(localStorage.getItem("carts")){
+        var a = JSON.parse(localStorage.getItem("carts"));
+        _("cartNum").innerText = Object.keys(a["orders"]).length;
+        }
+    }
+    updateCart();
+    </script>
+    <footer>
+    </footer>
+</body>
+</html>
